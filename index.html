@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>snake game</title>
+    <style>
+        *{ margin:0; padding:0;}
+        .box{ width:1150px; height:342px; margin:110px auto; background:url("img/stagebg.jpg") no-repeat; }
+        .nBox{ width:600px; height:270px; position:relative; left:187px; top:33px;}
+        .main .box .nBox div{ width:30px; height:30px; position:absolute;}
+        .main .box .nBox div.l {
+            -webkit-transform:rotate(0deg) ;
+            -moz-transform:rotate(0deg)  ;
+            -ms-transform:rotate(0deg)  ;
+            -o-transform:rotate(0deg)  ;
+            transform:rotate(0deg)  ;
+        }
+        .main .box .nBox div.r {
+            -webkit-transform:rotate(180deg) ;
+            -moz-transform:rotate(180deg)  ;
+            -ms-transform:rotate(180deg)  ;
+            -o-transform:rotate(180deg)  ;
+            transform:rotate(180deg)  ;
+        }
+        .main .box .nBox div.t {
+            -webkit-transform:rotate(90deg);
+            -moz-transform:rotate(90deg) ;
+            -ms-transform:rotate(90deg) ;
+            -o-transform:rotate(90deg) ;
+            transform:rotate(90deg) ;
+        }
+        .main .box .nBox div.b {
+            -webkit-transform:rotate(270deg);
+            -moz-transform:rotate(270deg) ;
+            -ms-transform:rotate(270deg) ;
+            -o-transform:rotate(270deg) ;
+            transform:rotate(270deg) ;
+        }
+				.info{ width:600px; margin:0 auto;}
+
+    </style>
+    <script>
+        window.onload=function(){
+            var oDiv=document.getElementsByClassName('nBox')[0];
+            //边框范围
+            var R=9,C=20;
+            //方向
+            var dir='l';
+
+            //1.蛇数组
+            var snake=[];
+            for(var i=0; i<5; i++ ){
+                var oNewDiv=document.createElement('div');
+                oNewDiv.style.background='url(img/snake'+i+'.png)';
+                oDiv.appendChild(oNewDiv);
+                snake[i]={ r:0 , c:5+i , div:oNewDiv , d:'l' , type:'snake'}
+
+                setPos(snake[i]);
+
+            }
+            function setPos(obj){
+                obj.div.style.left=obj.c*30+'px';
+                obj.div.style.top=obj.r*30+'px';
+                obj.div.className=obj.d;
+                if(obj.type=='eat'){
+                    obj.div.className=='';
+                }else if(obj.type=='snake'){
+                    obj.div.className==obj.d
+                }
+            }
+            //蛇移动
+            var timer=setInterval(function(){
+
+                for(var i=snake.length-1; i>0 ; i--) {
+                    snake[i].r = snake[i - 1].r;
+                    snake[i].c = snake[i - 1].c;
+                    snake[i].d = snake[i - 1].d;
+                }
+                //移动蛇头
+                switch (dir){
+                    case 'l':
+                        snake[0].c--;
+                        break;
+                    case 'r':
+                        snake[0].c++;
+                        break;
+                    case 't':
+                        snake[0].r--;
+                        break;
+                    case 'b':
+                        snake[0].r++;
+                        break;
+                }
+
+                //判断蛇有没有撞墙
+                if(snake[0].c<0 || snake[0].r<0 || snake[0].c>C || snake[0].r>R){
+                    alert('失败');
+                    clearInterval(timer);
+                }
+                //判断蛇有没有撞在吃的上
+                for(var i=1;i<aEat.length;i++){
+
+                    if(snake[0].c==aEat[i].c && snake[0].r==aEat[i].r){
+                        alert('失败');
+                        clearInterval(timer);
+                        return;
+                    }
+                }
+                //判断蛇有没有撞在自己身上
+                for(var i=1;i<snake.length;i++){
+                    if(snake[0].c == snake[i].c && snake[0].r == snake[i].r){
+                        alert('失败');
+                        clearInterval(timer);
+                        return;
+                    }
+                }
+                //蛇吃到东西
+                if( snake[0].c == aEat[0].c && snake[0].r == aEat[0].r){
+
+                    snake.splice(snake.length-3,0,aEat[0]);
+                    aEat.shift();
+                    if(aEat.length==0){
+                        createEat();
+                    }
+                }
+                //设置位置
+                for(var j=0 ; j<snake.length ; j++){
+                    setPos(snake[j]);
+                }
+
+            },300);
+
+            //通过键盘控制蛇的方向
+            document.onkeydown=function(ev){
+
+                oEvent=ev||event;
+//                alert(oEvent.keyCode);
+                switch (true){
+                    case oEvent.keyCode==65||oEvent.keyCode==37:  //left :A || ←
+                        dir='l';
+                        snake[0].d='l';
+                        break;
+                    case oEvent.keyCode==68||oEvent.keyCode==39:  //right :D || →
+                        dir='r';
+                        snake[0].d='r';
+                        break;
+                    case oEvent.keyCode==87||oEvent.keyCode==38: //top W || ↑
+                        dir='t';
+                        snake[0].d='t';
+                        break;
+                    case oEvent.keyCode==83||oEvent.keyCode==40:  //bottom S || ↓
+                        dir='b';
+                        snake[0].d='b';
+                        break;
+
+                }
+            };
+            //放置吃的
+            var aEat=[];
+            var nowRow=0; //吃到第几行
+            function createEat(){
+                while(aEat.length<4){
+                    var c=parseInt(Math.random()*C);
+                    var r=parseInt(Math.random()*R);
+                    console.log(c,r);
+                    var found=false;
+                    //判断位置是否与蛇重合
+                    for( var i=0 ; i<snake.length ; i++){
+                        if(c==snake[i].c && r==snake[i].r){
+                            found=true;
+                        }
+                    }
+                    //判断自己是否重合
+                    for(var i=0 ; i<aEat.length ; i++){
+                        if(c==aEat[i].c && r==aEat[i].r){
+                            found=true;
+                        }
+                    }
+                    if(!found){
+                        var oNewDiv=document.createElement('div');
+                        oNewDiv.style.background='url(img/iconBg.jpg) no-repeat -'+30*aEat.length+'px -'+30*nowRow+'px';
+                        oDiv.appendChild(oNewDiv);
+                        aEat.push({ r:r, c:c, div: oNewDiv , type:'eat' });
+                    }
+
+
+                }
+                //设置位置
+                for(var i=0; i<aEat.length; i++){
+                    setPos(aEat[i]);
+                }
+
+                nowRow++;
+            }
+            createEat();
+
+
+        }
+    </script>
+</head>
+<body>
+    <div class="main">
+        <div class="box">
+            <div class="nBox">
+
+            </div>
+        </div>
+        <div class="info">
+        	<h2>贪吃蛇小游戏</h2>
+        	<p>说明：</p>
+        	<p>按W/D/S/A 控制蛇上/右/下/左移动</p>
+        	<p>蛇按顺序吃东西，每吃一个东西，身体增加一格</p>
+        	<p>当蛇碰到边界和自己、不是当前应该吃的东西时游戏结束</p>
+        	<p>图片素材来源于网络</p>
+        </div>
+        
+
+    </div>
+</body>
+</html>
